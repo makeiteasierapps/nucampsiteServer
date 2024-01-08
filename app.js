@@ -14,6 +14,31 @@ const partnerRouter = require('./routes/partnerRouter');
 const app = express();
 
 const url = 'mongodb://localhost:27017/nucampsite';
+
+function auth(req, res, next) {
+    console.log(req.headers);
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        const err = new Error('You are not authenticated!');
+        res.setHeader('WWW-Authenticate', 'Basic');
+        err.status = 401;
+        return next(err);
+    }
+    const auth = Buffer.from(authHeader.split(' ')[1], 'base64')
+        .toString()
+        .split(':');
+    const user = auth[0];
+    const pass = auth[1];
+
+    if (user === 'admin' && pass === 'password') {
+        return next();
+    } else {
+        const err = new Error('You are not authenticated!');
+        res.setHeader('WWW-Authenticate', 'Basic');
+        err.status = 401;
+        return next(err);
+    }
+}
 const connect = mongoose.connect(url, {
     useCreateIndex: true,
     useFindAndModify: false,
@@ -30,6 +55,7 @@ connect.then(
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+app.use(auth);
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
