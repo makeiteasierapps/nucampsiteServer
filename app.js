@@ -6,7 +6,6 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const config = require('./config');
 
-
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const campsiteRouter = require('./routes/campsiteRouter');
@@ -14,6 +13,22 @@ const promotionRouter = require('./routes/promotionRouter');
 const partnerRouter = require('./routes/partnerRouter');
 
 const app = express();
+
+app.all('*', (req, res, next) => {
+    if (req.secure) {
+        return next();
+    } else {
+        console.log(
+            `Redirecting to: https://${req.hostname}:${app.get('secPort')}${
+                req.url
+            }`
+        );
+        res.redirect(
+            301,
+            `https://${req.hostname}:${app.get('secPort')}${req.url}`
+        );
+    }
+});
 const url = config.mongoUrl;
 const connect = mongoose.connect(url, {
     useCreateIndex: true,
