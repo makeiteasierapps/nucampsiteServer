@@ -71,7 +71,7 @@ favoriteRouter
         if (!mongoose.Types.ObjectId.isValid(campsiteId)) {
             res.statusCode = 404;
             res.setHeader('Content-Type', 'text/plain');
-            res.end('Campsite not found');
+            res.end('Invalid campsite ID');
             return;
         }
 
